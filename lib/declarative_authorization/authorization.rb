@@ -77,9 +77,10 @@ module Authorization
     extend Forwardable
     attr_reader :reader
 
-    def_delegators :@reader, :auth_rules_reader, :privileges_reader, :load, :load!
+    def_delegators :@reader, :auth_rules_reader, :privileges_reader, :restricted_fields_reader, :load, :load!
     def_delegators :auth_rules_reader, :auth_rules, :roles, :omnipotent_roles, :role_hierarchy, :role_titles, :role_descriptions
     def_delegators :privileges_reader, :privileges, :privilege_hierarchy
+    def_delegators :restricted_fields_reader, :restricted_fields
     
     # If +reader+ is not given, a new one is created with the default
     # authorization configuration of +AUTH_DSL_FILES+.  If given, may be either
@@ -276,6 +277,13 @@ module Authorization
     # Returns the role symbols and inherritted role symbols for the given user
     def roles_with_hierarchy_for(user)
       flatten_roles(roles_for(user))
+    end
+
+    def field_restricted?(context, privilege, field)
+      p restricted_fields
+      restricted_fields[context] &&
+        restricted_fields[context][privilege] &&
+        restricted_fields[context][privilege].include?(field)
     end
 
     def self.development_reload?
