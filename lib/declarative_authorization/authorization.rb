@@ -280,7 +280,6 @@ module Authorization
     end
 
     def field_restricted?(context, privilege, field)
-      p restricted_fields
       restricted_fields[context] &&
         restricted_fields[context][privilege] &&
         restricted_fields[context][privilege].include?(field)
