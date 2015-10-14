@@ -63,7 +63,7 @@ module Authorization
       def initialize_copy (from) # :nodoc:
         @privileges_reader = from.privileges_reader.clone
         @auth_rules_reader = from.auth_rules_reader.clone
-        @fields_reader = from.fields_reader.clone
+        @fields_reader = from.restricted_fields_reader.clone
       end
 
       def restricted_fields_reader
