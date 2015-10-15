@@ -57,11 +57,17 @@ module Authorization
       def initialize ()
         @privileges_reader = PrivilegesReader.new
         @auth_rules_reader = AuthorizationRulesReader.new
+        @fields_reader = RestrictedFieldsReader.new
       end
 
       def initialize_copy (from) # :nodoc:
         @privileges_reader = from.privileges_reader.clone
         @auth_rules_reader = from.auth_rules_reader.clone
+        @fields_reader = from.restricted_fields_reader.clone
+      end
+
+      def restricted_fields_reader
+        @fields_reader
       end
 
       # ensures you get back a DSLReader
@@ -128,6 +134,10 @@ module Authorization
 
         def authorization (&block)
           @parent.auth_rules_reader.instance_eval(&block)
+        end
+
+        def restricted_fields (&block)
+          @parent.restricted_fields_reader.instance_eval(&block)
         end
       end
     end
@@ -539,6 +549,27 @@ module Authorization
         caller_parts = caller(2).first.split(':')
         [caller_parts[0] == "(eval)" ? nil : caller_parts[0],
           caller_parts[1] && caller_parts[1].to_i]
+      end
+    end
+
+    class RestrictedFieldsReader
+      def initialize # :nodoc:
+        @fields = {}
+      end
+
+      def restricted_fields
+        @fields
+      end
+
+      def restrict_fields_on(context, to: [], only: [])
+        @fields[context] ||= {}
+        to = [to] unless to.is_a?(Array)
+        to.each do |action|
+          @fields[context][action] ||= Set.new
+          only.each do |field|
+            @fields[context][action].merge(only)
+          end
+        end
       end
     end
   end

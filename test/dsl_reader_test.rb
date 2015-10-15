@@ -116,6 +116,16 @@ class DSLReaderTest < Test::Unit::TestCase
     assert_equal 1, reader.auth_rules_reader.auth_rules.length
     assert reader.auth_rules_reader.auth_rules[0].matches?(:test_role, [:test], :perms)
   end
+
+  def test_restrict_fields
+    reader = Authorization::Reader::DSLReader.new
+    reader.parse %|
+      restricted_fields do
+        restrict_fields_on :customers, to: :read, only: [:phone_number]
+      end
+    |
+    assert_equal reader.restricted_fields_reader.restricted_fields[:customers], { read: Set.new([:phone_number]) }
+  end
   
   def test_context
     reader = Authorization::Reader::DSLReader.new

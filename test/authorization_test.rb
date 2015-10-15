@@ -1120,5 +1120,16 @@ class AuthorizationTest < Test::Unit::TestCase
     assert_not_equal engine.auth_rules.first.attributes.first.send(:instance_variable_get, :@conditions_hash)[:attr].object_id,
         cloned_engine.auth_rules.first.attributes.first.send(:instance_variable_get, :@conditions_hash)[:attr].object_id
   end
+
+  def test_field_restricted
+    reader = Authorization::Reader::DSLReader.new
+    reader.parse %|
+      restricted_fields do
+        restrict_fields_on :customers, to: :read, only: [:phone_number]
+      end
+    |
+    engine = Authorization::Engine.new(reader)
+    assert_equal engine.field_restricted?(:customers, :read, :phone_number), true
+  end
 end
 
